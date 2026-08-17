@@ -94,6 +94,8 @@
           // enable orchestrate and generate buttons
           document.getElementById('orchBtn').disabled = false;
           document.getElementById('genBtn').disabled = false;
+          // store last plan for orchestrator
+          window._lastPlan = data;
           fetchLogs();
         } catch (err) {
           statusBox.textContent = 'Plan generation failed: ' + err.message;
@@ -104,13 +106,39 @@
       document.getElementById('planBtn').addEventListener('click', generatePlan);
       document.getElementById('orchBtn').addEventListener('click', async ()=>{
         const baseUrl = baseUrlInput.value.replace(/\/$/, '');
+        if (!window._lastPlan) { statusBox.textContent = 'Generate a plan first'; return }
         statusBox.textContent = 'Starting orchestration...';
         try{
-          const r = await fetch(baseUrl + '/gateway/orchestrate', { method: 'POST', headers: { 'x-api-key': apiKeyInput.value } });
+          const body = { name: window._lastPlan.project || 'project', domain: window._lastPlan.summary || 'general', brief: document.getElementById('brief').value }
+          const r = await fetch(baseUrl + '/gateway/orchestrate', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-api-key': apiKeyInput.value }, body: JSON.stringify(body) });
           const j = await r.json();
-          statusBox.textContent = 'Orchestration: ' + (j.status || r.status);
+          if (j.run_id) {
+            statusBox.textContent = 'Orchestration started: ' + j.run_id;
+            // poll status
+            pollRun(j.run_id);
+          } else {
+            statusBox.textContent = 'Orchestration failed: ' + JSON.stringify(j);
+          }
         }catch(e){ statusBox.textContent = 'Orchestration failed: '+ e.message }
       });
+
+      async function pollRun(runId) {
+        const baseUrl = baseUrlInput.value.replace(/\/$/, '');
+        try{
+          const r = await fetch(baseUrl + '/gateway/runs/' + runId);
+          const j = await r.json();
+          document.getElementById('statusBox').innerText = 'Run ' + runId + ' status: ' + j.status;
+          const logsDiv = document.getElementById('logs');
+          logsDiv.innerHTML = '';
+          for (const e of j.logs || []) {
+            const d = document.createElement('div'); d.innerText = `[${new Date(e.ts*1000).toLocaleTimeString()}] ${e.msg}`; logsDiv.appendChild(d)
+          }
+          if (j.status && (j.status === 'queued' || j.status === 'running')) {
+            setTimeout(()=>pollRun(runId), 1500);
+          }
+        }catch(e){ console.warn('poll error', e) }
+      }
+
       document.getElementById('genBtn').addEventListener('click', async ()=>{
         const baseUrl = baseUrlInput.value.replace(/\/$/, '');
         statusBox.textContent = 'Generating product...';
