@@ -8,3 +8,5 @@ redis>=4.8.0
 fakeredis>=2.20.0
 prometheus_client>=0.15.0
 hypothesis>=6.80.0
+networkx>=3.0
+z3-solver>=4.8.17
