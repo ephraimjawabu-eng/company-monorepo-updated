@@ -1,11 +1,19 @@
 {
   "team": "backend_engineering",
   "subteams": [
-    {"name": "api", "responsibilities": ["API design", "contracts", "versioning", "gateway integration"]},
-    {"name": "data", "responsibilities": ["schema design", "data modeling", "migrations", "warehouse"]},
-    {"name": "infra", "responsibilities": ["hosting", "k8s/containers", "scaling"]},
-    {"name": "cache", "responsibilities": ["caching strategy", "redis/memcached integration"]},
-    {"name": "platform", "responsibilities": ["internal libraries", "sdk", "service-oriented architecture"]}
+    {"name": "api", "responsibilities": ["API design", "contracts", "versioning", "gateway integration", "serialization & schema validation"]},
+    {"name": "data_platform", "responsibilities": ["schema design", "data modeling", "migrations", "warehouse", "ACID/BASE decisioning"]},
+    {"name": "storage_engine", "responsibilities": ["storage engines (B-tree, LSM)", "indexing strategies", "query execution & optimization"]},
+    {"name": "distributed_systems", "responsibilities": ["consensus protocols", "CAP/PACELC analysis", "replication & sharding", "clock synchronization"]},
+    {"name": "caching", "responsibilities": ["caching strategy", "redis/memcached integration", "eviction policies (LRU, LFU)", "cache invalidation patterns"]},
+    {"name": "messaging", "responsibilities": ["message brokers", "delivery guarantees (at-most-once, at-least-once, exactly-once)", "dead-letter queues", "transactional outbox"]},
+    {"name": "concurrency", "responsibilities": ["concurrency primitives", "lock-free structures", "threading & async models", "Fencing & idempotency"]},
+    {"name": "persistence_ops", "responsibilities": ["backup/restore", "RPO/RTO planning", "schema evolution", "data lifecycle & sovereignty"]},
+    {"name": "security_data", "responsibilities": ["encryption at-rest/in-transit", "secret handling", "IAM & authn/authz", "compliance & audit trails"]},
+    {"name": "observability_sre", "responsibilities": ["metrics (REM/USE)", "tracing", "logging", "SLI/SLO/SLA", "chaos engineering"]},
+    {"name": "infra", "responsibilities": ["hosting", "k8s/containers", "scaling", "network topology & edge"]},
+    {"name": "platform", "responsibilities": ["internal libraries", "sdk", "service-oriented architecture", "cost optimization (FinOps)"]}
   ],
-  "lead": "backend-lead@example.com"
+  "lead": "backend-lead@example.com",
+  "notes": "Each subteam should produce machine-readable contracts (.contract.json) for CI validation. Focus on complexity bounds, storage topologies, and fault-model documentation."
 }
