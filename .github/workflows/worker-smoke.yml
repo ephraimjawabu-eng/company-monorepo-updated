@@ -1,0 +1,41 @@
+name: Worker smoke test
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'services/**'
+      - 'scripts/**'
+
+jobs:
+  worker-smoke:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r services/api/requirements.txt
+          pip install -r services/api/extra-requirements.txt
+      - name: Start backend
+        run: |
+          nohup uvicorn services.api.main:app --host 0.0.0.0 --port 8000 &
+          sleep 2
+      - name: Run worker smoke script
+        env:
+          REDIS_URL: redis://127.0.0.1:6379
+          BACKEND_URL: http://127.0.0.1:8000
+        run: |
+          chmod +x scripts/ci_worker_smoke.sh
+          ./scripts/ci_worker_smoke.sh
