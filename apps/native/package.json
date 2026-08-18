@@ -10,6 +10,9 @@
     "electron": "^25.0.0",
     "electron-builder": "^24.0.0"
   },
+  "dependencies": {
+    "keytar": "^8.0.0"
+  },
   "build": {
     "appId": "com.company.autopoietic",
     "productName": "Company Engine",

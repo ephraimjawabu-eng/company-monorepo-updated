@@ -15,19 +15,42 @@ for p in PATHS:
     base = os.path.join(ROOT, p)
     if not os.path.exists(base):
         continue
+    PATHS = ['services', 'apps']
+
+    # reuse repository-level whitelist if present
+    _IMPORT_WHITELIST = []
+    try:
+        import json, fnmatch
+        wl_path = os.path.join(ROOT, 'scanner_whitelist.json')
+        if os.path.exists(wl_path):
+            with open(wl_path, 'r', encoding='utf-8') as wf:
+                data = json.load(wf)
+                _IMPORT_WHITELIST = [p.strip() for p in data.get('paths', []) or []]
+    except Exception:
+        _IMPORT_WHITELIST = []
+
+    def _is_whitelisted(path_rel: str) -> bool:
+        for pat in _IMPORT_WHITELIST:
+            if fnmatch.fnmatch(path_rel, pat) or any(fnmatch.fnmatch(part, pat) for part in path_rel.split(os.sep)):
+                return True
+        return False
+
     for dirpath, dirnames, filenames in os.walk(base):
-        for fname in filenames:
-            if any(fname.lower().endswith(ext) for ext in EXT_SKIP):
+            rel = os.path.relpath(dirpath, ROOT)
+            if _is_whitelisted(rel):
                 continue
-            full = os.path.join(dirpath, fname)
-            try:
-                with open(full, 'r', encoding='utf-8', errors='ignore') as f:
-                    txt = f.read()
-            except Exception:
-                continue
-            res = secret_scanner.scan_text_for_secrets(txt)
-            for r in res:
-                matches.append({'file': os.path.relpath(full, ROOT), 'type': r['type'], 'snippet': r['snippet']})
+            for fname in filenames:
+                if any(fname.lower().endswith(ext) for ext in EXT_SKIP):
+                    continue
+                full = os.path.join(dirpath, fname)
+                try:
+                    with open(full, 'r', encoding='utf-8', errors='ignore') as f:
+                        txt = f.read()
+                except Exception:
+                    continue
+                res = secret_scanner.scan_text_for_secrets(txt)
+                for r in res:
+                    matches.append({'file': os.path.relpath(full, ROOT), 'type': r['type'], 'snippet': r['snippet']})
 
 print(f"Scanned paths: {PATHS}")
 print(f"Found {len(matches)} candidate secret(s) in selected paths. Showing up to 200:")

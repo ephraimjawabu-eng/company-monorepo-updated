@@ -11,31 +11,41 @@ IGNORED = {'.git', '.venv', 'venv', 'dist', '__pycache__'}
 # Allow scanner whitelist file at repo root to reduce noise
 EXT_SKIP = {'.png', '.jpg', '.jpeg', '.gif', '.zip', '.tar', '.gz', '.pyc', '.exe', '.dll'}
 
-# load optional whitelist to skip directories (simple basename matches)
+# load optional whitelist to skip directories (supports glob patterns)
 _IMPORT_WHITELIST = []
 try:
     import json
+    import fnmatch
     wl_path = os.path.join(ROOT, 'scanner_whitelist.json')
     if os.path.exists(wl_path):
         with open(wl_path, 'r', encoding='utf-8') as wf:
             data = json.load(wf)
             _IMPORT_WHITELIST = data.get('paths', []) or []
-            # normalize to set of basenames for simple checks
             _IMPORT_WHITELIST = [p.strip() for p in _IMPORT_WHITELIST if p.strip()]
 except Exception:
     _IMPORT_WHITELIST = []
 # if node_modules is not explicitly whitelisted, keep excluding it
-if 'node_modules' not in _IMPORT_WHITELIST:
+if not any('node_modules' in p for p in _IMPORT_WHITELIST):
     IGNORED.add('node_modules')
+
+def _is_whitelisted(path_rel: str) -> bool:
+    """Return True if path matches any whitelist glob pattern."""
+    import fnmatch
+    for pat in _IMPORT_WHITELIST:
+        # match against the relative path and also individual path parts
+        if fnmatch.fnmatch(path_rel, pat) or any(fnmatch.fnmatch(part, pat) for part in path_rel.split(os.sep)):
+            return True
+    return False
 
 matches = []
 
 for dirpath, dirnames, filenames in os.walk(ROOT):
     # skip ignored dirs or whitelisted skip-paths
+    rel = os.path.relpath(dirpath, ROOT)
     parts = set(dirpath.split(os.sep))
     if parts & IGNORED:
         continue
-    if any(w in parts for w in _IMPORT_WHITELIST):
+    if _is_whitelisted(rel):
         # skip paths explicitly configured in scanner_whitelist.json
         continue
     for fname in filenames:

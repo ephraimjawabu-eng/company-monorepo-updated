@@ -8,9 +8,17 @@ from services.api.gateway import router as gateway_router, attach_middleware as 
 
 # Prometheus metrics ASGI app
 try:
-    from prometheus_client import make_asgi_app
+    from prometheus_client import make_asgi_app, Counter, Histogram
 except Exception:
     make_asgi_app = None
+    Counter = None
+    Histogram = None
+
+# define gateway metrics if prometheus_client available
+REQUESTS_TOTAL = Counter('requests_total', 'Total requests') if Counter is not None else None
+REQUEST_LATENCY = Histogram('request_latency_seconds', 'Request latency') if Histogram is not None else None
+RATE_LIMITED = Counter('rate_limited_total', 'Rate limited requests') if Counter is not None else None
+AUTH_FAILURES = Counter('auth_failures_total', 'Auth failures') if Counter is not None else None
 
 app = FastAPI(title="Company Orchestration API")
 
@@ -44,7 +52,44 @@ class ProjectBrief(BaseModel):
 
 @app.get("/health")
 def health() -> dict[str, Any]:
-    return {"status": "ok"}
+    """Health endpoint that reports optional subsystem statuses and degraded mode.
+
+    Checks: Redis connectivity (if REDIS_URL set), Z3 availability for formal checks,
+    and whether Prometheus client is available.
+    """
+    import os
+    status = {"status": "ok", "degraded": False, "components": {}}
+    # check Redis
+    redis_url = os.getenv('REDIS_URL')
+    if redis_url:
+        try:
+            import redis as _redis
+            r = _redis.from_url(redis_url, socket_connect_timeout=1)
+            r.ping()
+            status['components']['redis'] = 'ok'
+        except Exception as e:
+            status['components']['redis'] = f'error: {str(e)}'
+            status['degraded'] = True
+    else:
+        status['components']['redis'] = 'disabled'
+
+    # check z3
+    try:
+        import z3  # type: ignore
+        status['components']['z3'] = 'ok'
+    except Exception:
+        status['components']['z3'] = 'unavailable'
+        # z3 absence is recoverable; mark degraded
+        status['degraded'] = True
+
+    # prometheus
+    try:
+        import prometheus_client as _pc
+        status['components']['prometheus'] = 'ok'
+    except Exception:
+        status['components']['prometheus'] = 'unavailable'
+
+    return status
 
 
 @app.get("/departments")
@@ -108,3 +153,41 @@ def plan_project(payload: ProjectBrief) -> dict[str, Any]:
 @app.post("/product")
 def create_product(p: Product):
     return {"created": True, "product": p.model_dump()}
+
+
+# Orchestration endpoints using orchestrator helper
+from services.api.orchestrator import enqueue_run, get_run_status, get_run_logs
+
+
+class OrchestrateBody(BaseModel):
+    brief: str
+    domain: str = "general"
+    name: str = "generated"
+
+
+@app.post('/gateway/orchestrate')
+def gateway_orchestrate(payload: OrchestrateBody):
+    # build brief and choose relevant departments using selection
+    plan = build_company_plan({
+        'name': payload.name,
+        'domain': payload.domain,
+        'goals': payload.brief,
+        'constraints': '',
+        'stack': 'fullstack'
+    })
+    departments = [d['id'] if isinstance(d, dict) and 'id' in d else d for d in plan['departments']]
+    run_id = enqueue_run({'name': payload.name, 'domain': payload.domain, 'goals': payload.brief}, departments=departments)
+    return { 'run_id': run_id }
+
+
+@app.get('/gateway/runs/{run_id}')
+def gateway_run_status(run_id: str):
+    s = get_run_status(run_id)
+    if not s:
+        return { 'error': 'not_found' }
+    return s
+
+
+@app.get('/gateway/runs/{run_id}/logs')
+def gateway_run_logs(run_id: str, n: int = 200):
+    return { 'logs': get_run_logs(run_id, n) }
