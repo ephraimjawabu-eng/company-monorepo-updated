@@ -98,6 +98,38 @@ def secure_erase(b: bytearray) -> None:
     """Attempt to overwrite sensitive bytearray content in-place.
     Python cannot guarantee zeroization at the interpreter level for immutable bytes objects;
     prefer working with bytearray for secrets that must be scrubbed.
+
+    This attempts OS-specific secure zeroization when possible (Windows SecureZeroMemory, libc memset).
     """
+    try:
+        # fast path: try ctypes to call platform-specific secure erase
+        import ctypes
+        if os.name == 'nt':
+            # Windows: use SecureZeroMemory from kernel32
+            try:
+                kernel32 = ctypes.WinDLL('kernel32')
+                addr = ctypes.addressof(ctypes.c_char.from_buffer(b))
+                kernel32.RtlSecureZeroMemory(ctypes.c_void_p(addr), ctypes.c_size_t(len(b)))
+                return
+            except Exception:
+                pass
+        else:
+            # POSIX: use libc memset to zero memory
+            try:
+                libc = ctypes.CDLL('libc.so.6')
+                addr = ctypes.addressof(ctypes.c_char.from_buffer(b))
+                libc.memset(ctypes.c_void_p(addr), ctypes.c_int(0), ctypes.c_size_t(len(b)))
+                return
+            except Exception:
+                pass
+    except Exception:
+        pass
+
+    # best-effort Python-level overwrite
     for i in range(len(b)):
         b[i] = 0
+    # attempt to remove reference
+    try:
+        del b
+    except Exception:
+        pass

@@ -42,6 +42,26 @@ def verify_no_path_z3(adj: Dict[str, List[str]], src: str, dst: str) -> bool:
             # if networkx missing, return False (cannot prove)
             return False
 
+
+def verify_no_path(adj: Dict[str, List[str]], src: str, dst: str) -> bool:
+    """Unified verifier: try Z3, fall back to graph reachability.
+
+    Returns True if verifier proves there is NO path from src to dst (conservative).
+    """
+    try:
+        return verify_no_path_z3(adj, src, dst)
+    except Exception:
+        # worst-case conservative fallback
+        try:
+            import networkx as nx
+            g = nx.DiGraph()
+            for u, vs in adj.items():
+                for v in vs:
+                    g.add_edge(u, v)
+            return not nx.has_path(g, src, dst)
+        except Exception:
+            return False
+
     nodes = list(adj.keys())
     if src not in nodes or dst not in nodes:
         # if nodes missing, conservatively return False
