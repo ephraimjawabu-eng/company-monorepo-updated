@@ -1,0 +1,157 @@
+{
+  "id": "local-test-1787064995",
+  "brief": {
+    "title": "local-job"
+  },
+  "departments": [],
+  "status": "completed",
+  "created_at": 1787064995.436096,
+  "logs": [
+    {
+      "ts": 1787064995.4376452,
+      "msg": "autopoietic: starting iteration"
+    },
+    {
+      "ts": 1787064995.4392831,
+      "msg": "autopoietic: recon {'nodes_count': 4, 'sensitive': ['db'], 'central_nodes': ['frontend', 'backend', 'public', 'db']}"
+    },
+    {
+      "ts": 1787064995.4402053,
+      "msg": "autopoietic: crypto [{'issue': 'ok', 'detail': 'aead_present'}]"
+    },
+    {
+      "ts": 1787064995.6968524,
+      "msg": "autopoietic: patch {'patches': [{'action': 'isolate', 'target': 'db', 'reason': 'reachable_from_public'}]} verified=True"
+    },
+    {
+      "ts": 1787064995.9020572,
+      "msg": "autopoietic: starting iteration"
+    },
+    {
+      "ts": 1787064995.9034913,
+      "msg": "autopoietic: recon {'nodes_count': 4, 'sensitive': ['db'], 'central_nodes': ['frontend', 'backend', 'public', 'db']}"
+    },
+    {
+      "ts": 1787064995.9043965,
+      "msg": "autopoietic: crypto [{'issue': 'ok', 'detail': 'aead_present'}]"
+    },
+    {
+      "ts": 1787064996.1733458,
+      "msg": "autopoietic: patch {'patches': [{'action': 'isolate', 'target': 'db', 'reason': 'reachable_from_public'}]} verified=True"
+    }
+  ],
+  "started_at": 1787064995.4361053,
+  "results": [
+    {
+      "recon": {
+        "nodes_count": 4,
+        "sensitive": [
+          "db"
+        ],
+        "central_nodes": [
+          "frontend",
+          "backend",
+          "public",
+          "db"
+        ]
+      },
+      "crypto": [
+        {
+          "issue": "ok",
+          "detail": "aead_present"
+        }
+      ],
+      "detections": [
+        {
+          "rule": "rule-topo-1",
+          "type": "topology",
+          "desc": "Public to DB reachability",
+          "severity": "high"
+        },
+        {
+          "rule": "det-001",
+          "type": "topology",
+          "desc": "Example: Suspicious DB access from frontend",
+          "severity": "high"
+        },
+        {
+          "rule": "curated-topo-public-db",
+          "type": "topology",
+          "desc": "Public to DB path",
+          "severity": "high"
+        }
+      ],
+      "patch": {
+        "patches": [
+          {
+            "action": "isolate",
+            "target": "db",
+            "reason": "reachable_from_public"
+          }
+        ]
+      },
+      "verified": true,
+      "errors": [
+        "env_finding:runtime_hints:runtime summary",
+        "env_finding:sensitive_assets:sensitive assets present",
+        "env_finding:circuit_breaker:recommend adding CB+backoff for external services"
+      ]
+    },
+    {
+      "recon": {
+        "nodes_count": 4,
+        "sensitive": [
+          "db"
+        ],
+        "central_nodes": [
+          "frontend",
+          "backend",
+          "public",
+          "db"
+        ]
+      },
+      "crypto": [
+        {
+          "issue": "ok",
+          "detail": "aead_present"
+        }
+      ],
+      "detections": [
+        {
+          "rule": "rule-topo-1",
+          "type": "topology",
+          "desc": "Public to DB reachability",
+          "severity": "high"
+        },
+        {
+          "rule": "det-001",
+          "type": "topology",
+          "desc": "Example: Suspicious DB access from frontend",
+          "severity": "high"
+        },
+        {
+          "rule": "curated-topo-public-db",
+          "type": "topology",
+          "desc": "Public to DB path",
+          "severity": "high"
+        }
+      ],
+      "patch": {
+        "patches": [
+          {
+            "action": "isolate",
+            "target": "db",
+            "reason": "reachable_from_public"
+          }
+        ]
+      },
+      "verified": true,
+      "errors": [
+        "env_finding:runtime_hints:runtime summary",
+        "env_finding:sensitive_assets:sensitive assets present",
+        "env_finding:circuit_breaker:recommend adding CB+backoff for external services"
+      ]
+    }
+  ],
+  "finished_at": 1787064996.3753908
+}

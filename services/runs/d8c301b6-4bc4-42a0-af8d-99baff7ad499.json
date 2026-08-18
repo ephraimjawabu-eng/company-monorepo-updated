@@ -1,0 +1,126 @@
+{
+  "id": "d8c301b6-4bc4-42a0-af8d-99baff7ad499",
+  "brief": {
+    "title": "test-run"
+  },
+  "departments": [
+    "frontend",
+    "backend"
+  ],
+  "status": "completed",
+  "created_at": 1787048238.5742967,
+  "logs": [
+    {
+      "ts": 1787048238.5893652,
+      "msg": "autopoietic: starting iteration"
+    },
+    {
+      "ts": 1787048238.5906248,
+      "msg": "autopoietic: recon {'nodes_count': 4, 'sensitive': ['db'], 'central_nodes': ['frontend', 'backend', 'public', 'db']}"
+    },
+    {
+      "ts": 1787048238.591754,
+      "msg": "autopoietic: crypto [{'issue': 'ok', 'detail': 'aead_present'}]"
+    },
+    {
+      "ts": 1787048238.59673,
+      "msg": "autopoietic: patch {'patches': [{'action': 'isolate', 'target': 'db', 'reason': 'reachable_from_public'}]} verified=True"
+    },
+    {
+      "ts": 1787048238.79891,
+      "msg": "autopoietic: starting iteration"
+    },
+    {
+      "ts": 1787048238.8005881,
+      "msg": "autopoietic: recon {'nodes_count': 4, 'sensitive': ['db'], 'central_nodes': ['frontend', 'backend', 'public', 'db']}"
+    },
+    {
+      "ts": 1787048238.8015325,
+      "msg": "autopoietic: crypto [{'issue': 'ok', 'detail': 'aead_present'}]"
+    },
+    {
+      "ts": 1787048238.8051646,
+      "msg": "autopoietic: patch {'patches': [{'action': 'isolate', 'target': 'db', 'reason': 'reachable_from_public'}]} verified=True"
+    }
+  ],
+  "started_at": 1787048238.5749218,
+  "results": [
+    {
+      "recon": {
+        "nodes_count": 4,
+        "sensitive": [
+          "db"
+        ],
+        "central_nodes": [
+          "frontend",
+          "backend",
+          "public",
+          "db"
+        ]
+      },
+      "crypto": [
+        {
+          "issue": "ok",
+          "detail": "aead_present"
+        }
+      ],
+      "detections": [
+        {
+          "rule": "rule-topo-1",
+          "type": "topology",
+          "desc": "Public to DB reachability",
+          "severity": "high"
+        }
+      ],
+      "patch": {
+        "patches": [
+          {
+            "action": "isolate",
+            "target": "db",
+            "reason": "reachable_from_public"
+          }
+        ]
+      },
+      "verified": true
+    },
+    {
+      "recon": {
+        "nodes_count": 4,
+        "sensitive": [
+          "db"
+        ],
+        "central_nodes": [
+          "frontend",
+          "backend",
+          "public",
+          "db"
+        ]
+      },
+      "crypto": [
+        {
+          "issue": "ok",
+          "detail": "aead_present"
+        }
+      ],
+      "detections": [
+        {
+          "rule": "rule-topo-1",
+          "type": "topology",
+          "desc": "Public to DB reachability",
+          "severity": "high"
+        }
+      ],
+      "patch": {
+        "patches": [
+          {
+            "action": "isolate",
+            "target": "db",
+            "reason": "reachable_from_public"
+          }
+        ]
+      },
+      "verified": true
+    }
+  ],
+  "finished_at": 1787048239.0067942
+}

@@ -1,0 +1,201 @@
+{
+  "id": "local-test-1787079226",
+  "brief": {
+    "title": "local-job"
+  },
+  "departments": [],
+  "status": "completed",
+  "created_at": 1787079226.1098635,
+  "logs": [
+    {
+      "ts": 1787079226.1236823,
+      "msg": "autopoietic: starting iteration"
+    },
+    {
+      "ts": 1787079226.1250196,
+      "msg": "autopoietic: recon {'nodes_count': 4, 'sensitive': ['db'], 'central_nodes': ['frontend', 'backend', 'public', 'db']}"
+    },
+    {
+      "ts": 1787079226.126073,
+      "msg": "autopoietic: crypto [{'issue': 'ok', 'detail': 'aead_present'}]"
+    },
+    {
+      "ts": 1787079226.3834555,
+      "msg": "autopoietic: patch {'patches': [{'action': 'isolate', 'target': 'db', 'reason': 'reachable_from_public'}]} verified=True"
+    },
+    {
+      "ts": 1787079226.5852094,
+      "msg": "autopoietic: starting iteration"
+    },
+    {
+      "ts": 1787079226.5866637,
+      "msg": "autopoietic: recon {'nodes_count': 4, 'sensitive': ['db'], 'central_nodes': ['frontend', 'backend', 'public', 'db']}"
+    },
+    {
+      "ts": 1787079226.5892103,
+      "msg": "autopoietic: crypto [{'issue': 'ok', 'detail': 'aead_present'}]"
+    },
+    {
+      "ts": 1787079226.7921526,
+      "msg": "autopoietic: patch {'patches': [{'action': 'isolate', 'target': 'db', 'reason': 'reachable_from_public'}]} verified=True"
+    }
+  ],
+  "started_at": 1787079226.1099386,
+  "results": [
+    {
+      "recon": {
+        "nodes_count": 4,
+        "sensitive": [
+          "db"
+        ],
+        "central_nodes": [
+          "frontend",
+          "backend",
+          "public",
+          "db"
+        ]
+      },
+      "crypto": [
+        {
+          "issue": "ok",
+          "detail": "aead_present"
+        }
+      ],
+      "detections": [
+        {
+          "rule": "rule-topo-1",
+          "type": "topology",
+          "desc": "Public to DB reachability",
+          "severity": "high"
+        },
+        {
+          "rule": "det-001",
+          "type": "topology",
+          "desc": "Example: Suspicious DB access from frontend",
+          "severity": "high"
+        },
+        {
+          "rule": "curated-topo-public-db",
+          "type": "topology",
+          "desc": "Public to DB path",
+          "severity": "high"
+        }
+      ],
+      "patch": {
+        "patches": [
+          {
+            "action": "isolate",
+            "target": "db",
+            "reason": "reachable_from_public"
+          }
+        ]
+      },
+      "verified": true,
+      "errors": [
+        "env_finding:runtime_hints:runtime summary",
+        "env_finding:sensitive_assets:sensitive assets present",
+        "env_finding:circuit_breaker:recommend adding CB+backoff for external services",
+        "exploit_eval_error:exploit-054732b23602:name 'json' is not defined",
+        "exploit_eval_error:exploit-0b156f8e15c6:name 'json' is not defined",
+        "exploit_eval_error:exploit-114a75fa3663:name 'json' is not defined",
+        "exploit_eval_error:exploit-202dbecbc84b:name 'json' is not defined",
+        "exploit_eval_error:exploit-326068f16498:name 'json' is not defined",
+        "exploit_eval_error:exploit-3ab0189d990a:name 'json' is not defined",
+        "exploit_eval_error:exploit-7cc719fcdd99:name 'json' is not defined",
+        "exploit_eval_error:exploit-7e680e211723:name 'json' is not defined",
+        "exploit_eval_error:exploit-7f41d6c89906:name 'json' is not defined",
+        "exploit_eval_error:exploit-88f4bde8c427:name 'json' is not defined",
+        "exploit_eval_error:exploit-89fd48a03c2d:name 'json' is not defined",
+        "exploit_eval_error:exploit-8bc4dbea6271:name 'json' is not defined",
+        "exploit_eval_error:exploit-aad4828f02ed:name 'json' is not defined",
+        "exploit_eval_error:exploit-bc53226e651b:name 'json' is not defined",
+        "exploit_eval_error:exploit-d74ef1b857bf:name 'json' is not defined",
+        "exploit_eval_error:exploit-d8d836c12887:name 'json' is not defined",
+        "exploit_eval_error:exploit-e9a508d012ca:name 'json' is not defined",
+        "exploit_eval_error:exploit-ef657906eef7:name 'json' is not defined",
+        "exploit_eval_error:exploit-f20dcc49b2cc:name 'json' is not defined",
+        "exploit_eval_error:exploit-f4393d82c860:name 'json' is not defined",
+        "exploit_eval_error:exploit-f45bb0eb840d:name 'json' is not defined",
+        "exploit_eval_error:exploit-fe93ab41683d:name 'json' is not defined"
+      ]
+    },
+    {
+      "recon": {
+        "nodes_count": 4,
+        "sensitive": [
+          "db"
+        ],
+        "central_nodes": [
+          "frontend",
+          "backend",
+          "public",
+          "db"
+        ]
+      },
+      "crypto": [
+        {
+          "issue": "ok",
+          "detail": "aead_present"
+        }
+      ],
+      "detections": [
+        {
+          "rule": "rule-topo-1",
+          "type": "topology",
+          "desc": "Public to DB reachability",
+          "severity": "high"
+        },
+        {
+          "rule": "det-001",
+          "type": "topology",
+          "desc": "Example: Suspicious DB access from frontend",
+          "severity": "high"
+        },
+        {
+          "rule": "curated-topo-public-db",
+          "type": "topology",
+          "desc": "Public to DB path",
+          "severity": "high"
+        }
+      ],
+      "patch": {
+        "patches": [
+          {
+            "action": "isolate",
+            "target": "db",
+            "reason": "reachable_from_public"
+          }
+        ]
+      },
+      "verified": true,
+      "errors": [
+        "env_finding:runtime_hints:runtime summary",
+        "env_finding:sensitive_assets:sensitive assets present",
+        "env_finding:circuit_breaker:recommend adding CB+backoff for external services",
+        "exploit_eval_error:exploit-054732b23602:name 'json' is not defined",
+        "exploit_eval_error:exploit-0b156f8e15c6:name 'json' is not defined",
+        "exploit_eval_error:exploit-114a75fa3663:name 'json' is not defined",
+        "exploit_eval_error:exploit-202dbecbc84b:name 'json' is not defined",
+        "exploit_eval_error:exploit-326068f16498:name 'json' is not defined",
+        "exploit_eval_error:exploit-3ab0189d990a:name 'json' is not defined",
+        "exploit_eval_error:exploit-7cc719fcdd99:name 'json' is not defined",
+        "exploit_eval_error:exploit-7e680e211723:name 'json' is not defined",
+        "exploit_eval_error:exploit-7f41d6c89906:name 'json' is not defined",
+        "exploit_eval_error:exploit-88f4bde8c427:name 'json' is not defined",
+        "exploit_eval_error:exploit-89fd48a03c2d:name 'json' is not defined",
+        "exploit_eval_error:exploit-8bc4dbea6271:name 'json' is not defined",
+        "exploit_eval_error:exploit-aad4828f02ed:name 'json' is not defined",
+        "exploit_eval_error:exploit-bc53226e651b:name 'json' is not defined",
+        "exploit_eval_error:exploit-d74ef1b857bf:name 'json' is not defined",
+        "exploit_eval_error:exploit-d8d836c12887:name 'json' is not defined",
+        "exploit_eval_error:exploit-e9a508d012ca:name 'json' is not defined",
+        "exploit_eval_error:exploit-ef657906eef7:name 'json' is not defined",
+        "exploit_eval_error:exploit-f20dcc49b2cc:name 'json' is not defined",
+        "exploit_eval_error:exploit-f4393d82c860:name 'json' is not defined",
+        "exploit_eval_error:exploit-f45bb0eb840d:name 'json' is not defined",
+        "exploit_eval_error:exploit-fe93ab41683d:name 'json' is not defined"
+      ]
+    }
+  ],
+  "finished_at": 1787079226.9949045
+}

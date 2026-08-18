@@ -1,0 +1,7 @@
+---
+id: curated-topo-public-db
+title: Public to DB path
+severity: high
+type: topology
+condition: "public -> db"
+notes: "Minimal curated rule to detect public to database reachable path in demo topology."

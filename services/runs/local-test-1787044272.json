@@ -1,0 +1,107 @@
+{
+  "id": "local-test-1787044272",
+  "brief": {
+    "title": "local-job"
+  },
+  "departments": [],
+  "status": "completed",
+  "created_at": 1787044272.4332669,
+  "logs": [
+    {
+      "ts": 1787044272.4339454,
+      "msg": "autopoietic: starting iteration"
+    },
+    {
+      "ts": 1787044272.4362948,
+      "msg": "autopoietic: recon {'nodes_count': 4, 'sensitive': ['db'], 'central_nodes': ['frontend', 'backend', 'public', 'db']}"
+    },
+    {
+      "ts": 1787044272.4374006,
+      "msg": "autopoietic: crypto [{'issue': 'ok', 'detail': 'aead_present'}]"
+    },
+    {
+      "ts": 1787044272.4408205,
+      "msg": "autopoietic: patch {'patches': [{'action': 'isolate', 'target': 'db', 'reason': 'reachable_from_public'}]} verified=True"
+    },
+    {
+      "ts": 1787044272.6432018,
+      "msg": "autopoietic: starting iteration"
+    },
+    {
+      "ts": 1787044272.6445086,
+      "msg": "autopoietic: recon {'nodes_count': 4, 'sensitive': ['db'], 'central_nodes': ['frontend', 'backend', 'public', 'db']}"
+    },
+    {
+      "ts": 1787044272.645417,
+      "msg": "autopoietic: crypto [{'issue': 'ok', 'detail': 'aead_present'}]"
+    },
+    {
+      "ts": 1787044272.649125,
+      "msg": "autopoietic: patch {'patches': [{'action': 'isolate', 'target': 'db', 'reason': 'reachable_from_public'}]} verified=True"
+    }
+  ],
+  "started_at": 1787044272.433272,
+  "results": [
+    {
+      "recon": {
+        "nodes_count": 4,
+        "sensitive": [
+          "db"
+        ],
+        "central_nodes": [
+          "frontend",
+          "backend",
+          "public",
+          "db"
+        ]
+      },
+      "crypto": [
+        {
+          "issue": "ok",
+          "detail": "aead_present"
+        }
+      ],
+      "patch": {
+        "patches": [
+          {
+            "action": "isolate",
+            "target": "db",
+            "reason": "reachable_from_public"
+          }
+        ]
+      },
+      "verified": true
+    },
+    {
+      "recon": {
+        "nodes_count": 4,
+        "sensitive": [
+          "db"
+        ],
+        "central_nodes": [
+          "frontend",
+          "backend",
+          "public",
+          "db"
+        ]
+      },
+      "crypto": [
+        {
+          "issue": "ok",
+          "detail": "aead_present"
+        }
+      ],
+      "patch": {
+        "patches": [
+          {
+            "action": "isolate",
+            "target": "db",
+            "reason": "reachable_from_public"
+          }
+        ]
+      },
+      "verified": true
+    }
+  ],
+  "finished_at": 1787044272.8545086
+}

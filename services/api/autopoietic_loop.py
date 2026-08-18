@@ -8,6 +8,7 @@ from services.api.topology import GraphTopology
 from services.api.agents_red import GraphReconAgent, CryptanalysisAgent
 from services.api.agents_blue import AutopoieticHardenerAgent
 from services.api.integrations import detection_loader
+from services.api.resilience import EnvironmentResilience
 import os
 
 
@@ -59,7 +60,26 @@ class AutopoieticLoop:
             rules = []
             errors.append(f'rule_load_error: {e}')
 
+        # environment resilience audit: check runtime and config mismatches
+        try:
+            resil = EnvironmentResilience()
+            env_findings = resil.audit_environment(self.topology, recon)
+            # attach environment findings into overall crypto/findings set for visibility
+            if env_findings:
+                errors.extend([f'env_finding:{f.get("type")}:{f.get("desc")}' for f in env_findings if f])
+        except Exception as e:
+            env_findings = []
+            errors.append(f'env_audit_error: {e}')
+
         # simple rule evaluation: topology rules like 'public->db'
+        # also look for exploit patterns learned from harvests
+        try:
+            exploits_dir = os.path.join(rules_dir, 'exploits', 'curated')
+            from services.api.integrations.exploit_loader import load_exploits_from_dir
+            exploit_rules = load_exploits_from_dir(exploits_dir)
+        except Exception:
+            exploit_rules = []
+
         for r in rules:
             try:
                 raw = r.get('raw') or {}
@@ -77,6 +97,21 @@ class AutopoieticLoop:
                         detections.append({'rule': r.get('id') or r.get('title'), 'type': 'heuristic', 'desc': r.get('title')})
             except Exception as e:
                 errors.append(f'rule_eval_error:{r.get("id") or r.get("title")}:{e}')
+                continue
+
+        # evaluate exploit rules heuristically: look for their snippet or title in recon/crypto outputs
+        for ex in exploit_rules:
+            try:
+                snippet = (ex.get('snippet') or '')
+                title = ex.get('title') or ''
+                src = ex.get('source')
+                combined = json.dumps(recon or {}) + json.dumps(crypto_findings or {})
+                if snippet and snippet[:120].lower() in combined.lower():
+                    detections.append({'rule': ex.get('id'), 'type': 'exploit_pattern', 'desc': f"exploit snippet from {src}", 'severity': 'medium'})
+                elif title and title.lower() in combined.lower():
+                    detections.append({'rule': ex.get('id'), 'type': 'exploit_pattern', 'desc': f"exploit title match {title}", 'severity': 'low'})
+            except Exception as e:
+                errors.append(f'exploit_eval_error:{ex.get("id")}:{e}')
                 continue
 
         # propose patch and verify, but tolerate failures to keep loop alive

@@ -12,7 +12,9 @@ from __future__ import annotations
 import os
 import base64
 import logging
-from typing import Optional
+import hashlib
+import time
+from typing import Optional, Dict, List
 
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives import hashes
@@ -90,3 +92,53 @@ def get_dek_for_context(context: str | bytes) -> Optional[bytes]:
     if kek is None:
         return None
     return kms_client.derive_dek(kek, context=ctx)
+
+
+class KMSRotationManager:
+    """Small rotation and key-hierarchy manager for demo/production scaffolding.
+
+    It is intentionally compact and deterministic: a root KEK can be rotated by deriving a new
+    KEK from the old root, storing a version marker, and building per-context child keys.
+    """
+
+    def __init__(self, key_id: str = "company-engine-root") -> None:
+        self.key_id = key_id
+
+    @staticmethod
+    def _derive_child(root: bytes, label: bytes, length: int = 32) -> bytes:
+        hk = HKDF(algorithm=hashes.SHA256(), length=length, salt=None, info=label)
+        return hk.derive(root)
+
+    def rotate_kek(self, current_kek: bytes, context: bytes = b"kms-rotation") -> Dict[str, object]:
+        if not current_kek:
+            raise ValueError("current_kek is required")
+        ts = int(time.time())
+        new_root = self._derive_child(current_kek, b"rotated:" + context)
+        version = hashlib.sha256(current_kek + b"|" + new_root + str(ts).encode("utf-8")).hexdigest()[:16]
+        return {
+            "key_id": self.key_id,
+            "version": version,
+            "rotated_at": ts,
+            "previous_kek_fingerprint": hashlib.sha256(current_kek).hexdigest(),
+            "new_kek_fingerprint": hashlib.sha256(new_root).hexdigest(),
+            "new_kek": new_root,
+        }
+
+    def build_key_hierarchy(self, root_kek: bytes, contexts: List[str]) -> Dict[str, bytes]:
+        if not root_kek:
+            raise ValueError("root_kek is required")
+        hierarchy: Dict[str, bytes] = {}
+        for idx, context in enumerate(contexts):
+            label = f"company:{idx}:{context}".encode("utf-8")
+            hierarchy[context] = self._derive_child(root_kek, label)
+        return hierarchy
+
+
+def rotate_and_record_kek(current_kek: bytes, context: str = "company") -> Dict[str, object]:
+    manager = KMSRotationManager()
+    return manager.rotate_kek(current_kek, context=context.encode("utf-8"))
+
+
+def build_key_hierarchy(root_kek: bytes, contexts: List[str]) -> Dict[str, bytes]:
+    manager = KMSRotationManager()
+    return manager.build_key_hierarchy(root_kek, contexts)
