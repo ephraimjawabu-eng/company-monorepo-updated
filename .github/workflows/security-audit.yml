@@ -1,0 +1,36 @@
+name: Security audit
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * 0' # weekly
+
+jobs:
+  static-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r services/api/requirements.txt
+      - name: Run tests
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python -m pytest -q
+      - name: Run secret scanner (selected)
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python scripts/scan_selected_dirs.py
+          python scripts/scan_repo_secrets.py
+      - name: Run autopoietic demo
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python services/api/demo_run.py
