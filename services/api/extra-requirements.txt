@@ -1,0 +1,4 @@
+# Extra runtime and developer deps for worker and KMS helper
+rq>=1.1.0
+python-dotenv>=1.1.1
+cryptography>=41.0.0
