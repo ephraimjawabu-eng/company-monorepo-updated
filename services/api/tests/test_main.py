@@ -8,7 +8,10 @@ client = TestClient(app)
 def test_health():
     r = client.get('/health')
     assert r.status_code == 200
-    assert r.json() == {"status": "ok"}
+    js = r.json()
+    # allow additional diagnostics in health response; ensure at least status ok
+    assert isinstance(js, dict)
+    assert js.get('status') == 'ok'
 
 
 def test_plan_project():
