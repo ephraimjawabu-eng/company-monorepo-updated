@@ -81,11 +81,27 @@ def enqueue_run(brief: Dict[str, Any], departments: Optional[list[str]] = None) 
 
 
 def run_job(run_id: str, run_meta: Dict[str, Any]) -> Dict[str, Any]:
-    """Worker-executed job: runs the autopoietic loop and writes logs/status."""
+    """Worker-executed job: runs the autopoietic loop and writes logs/status.
+
+    Persists run metadata to Redis when REDIS_URL is configured so remote workers and
+    the API server observe the same state. Falls back to local file persistence.
+    """
+    # helper to persist to redis if available
+    def _persist_remote(meta: Dict[str, Any]):
+        redis_url = os.getenv('REDIS_URL')
+        if redis_url and redis is not None:
+            try:
+                r = redis.from_url(redis_url, decode_responses=True)
+                r.set(f'run:{run_id}', json.dumps(meta))
+            except Exception:
+                # best-effort remote persistence; ignore failures
+                pass
+
     # update status
     run_meta['status'] = 'running'
     run_meta['started_at'] = time.time()
     _persist_local_run(run_id, run_meta)
+    _persist_remote(run_meta)
 
     # prepare topology and run only relevant departments (simulate)
     topo = GraphTopology()
@@ -98,7 +114,18 @@ def run_job(run_id: str, run_meta: Dict[str, Any]) -> Dict[str, Any]:
     topo.add_edge('frontend', 'backend')
     topo.add_edge('backend', 'db')
 
-    loop = AutopoieticLoop(topo, logger=lambda m: run_meta['logs'].append({'ts': time.time(), 'msg': m}))
+    # logger that appends to run_meta logs and persists incrementally
+    def _log(msg: str):
+        entry = {'ts': time.time(), 'msg': msg}
+        run_meta.setdefault('logs', []).append(entry)
+        # persist both locally and remotely so callers can tail logs
+        try:
+            _persist_local_run(run_id, run_meta)
+        except Exception:
+            pass
+        _persist_remote(run_meta)
+
+    loop = AutopoieticLoop(topo, logger=_log)
 
     try:
         results = loop.run(iterations=2, delay=0.2)
@@ -109,6 +136,7 @@ def run_job(run_id: str, run_meta: Dict[str, Any]) -> Dict[str, Any]:
         run_meta.setdefault('errors', []).append(str(e))
     run_meta['finished_at'] = time.time()
     _persist_local_run(run_id, run_meta)
+    _persist_remote(run_meta)
     return run_meta
 
 
