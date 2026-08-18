@@ -1,0 +1,20 @@
+[
+  {
+    "id": "gk_aws_access_key",
+    "description": "AWS access key ID (AKIA)",
+    "regex": "AKIA[0-9A-Z]{16}",
+    "severity": "high"
+  },
+  {
+    "id": "gk_rsa_priv",
+    "description": "RSA private key header",
+    "regex": "-----BEGIN RSA PRIVATE KEY-----",
+    "severity": "critical"
+  },
+  {
+    "id": "gk_github_pat",
+    "description": "GitHub PAT-like token",
+    "regex": "gh[pousr]_[A-Za-z0-9_]{36}",
+    "severity": "high"
+  }
+]
