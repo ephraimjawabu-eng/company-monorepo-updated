@@ -1,0 +1,8 @@
+{
+  "id": "rule-topo-1",
+  "title": "Public to DB reachability",
+  "type": "topology",
+  "condition": "public->db",
+  "severity": "high",
+  "description": "Detect a path from a public node to a DB node."
+}

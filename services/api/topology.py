@@ -37,6 +37,10 @@ class GraphTopology:
         except Exception:
             return []
 
+    def has_node(self, node_id: str) -> bool:
+        """Return True if node exists in topology."""
+        return node_id in self.graph.nodes()
+
     def sensitive_assets(self) -> List[str]:
         """Return nodes marked sensitive in metadata."""
         return [n for n, d in self.graph.nodes(data=True) if d.get('sensitivity') == 'high']

@@ -7,15 +7,36 @@ import sys
 from services.api.integrations import secret_scanner
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-IGNORED = {'.git', '.venv', 'venv', 'node_modules', 'dist', '__pycache__'}
+IGNORED = {'.git', '.venv', 'venv', 'dist', '__pycache__'}
+# Allow scanner whitelist file at repo root to reduce noise
 EXT_SKIP = {'.png', '.jpg', '.jpeg', '.gif', '.zip', '.tar', '.gz', '.pyc', '.exe', '.dll'}
+
+# load optional whitelist to skip directories (simple basename matches)
+_IMPORT_WHITELIST = []
+try:
+    import json
+    wl_path = os.path.join(ROOT, 'scanner_whitelist.json')
+    if os.path.exists(wl_path):
+        with open(wl_path, 'r', encoding='utf-8') as wf:
+            data = json.load(wf)
+            _IMPORT_WHITELIST = data.get('paths', []) or []
+            # normalize to set of basenames for simple checks
+            _IMPORT_WHITELIST = [p.strip() for p in _IMPORT_WHITELIST if p.strip()]
+except Exception:
+    _IMPORT_WHITELIST = []
+# if node_modules is not explicitly whitelisted, keep excluding it
+if 'node_modules' not in _IMPORT_WHITELIST:
+    IGNORED.add('node_modules')
 
 matches = []
 
 for dirpath, dirnames, filenames in os.walk(ROOT):
-    # skip ignored dirs
+    # skip ignored dirs or whitelisted skip-paths
     parts = set(dirpath.split(os.sep))
     if parts & IGNORED:
+        continue
+    if any(w in parts for w in _IMPORT_WHITELIST):
+        # skip paths explicitly configured in scanner_whitelist.json
         continue
     for fname in filenames:
         if any(fname.lower().endswith(ext) for ext in EXT_SKIP):
