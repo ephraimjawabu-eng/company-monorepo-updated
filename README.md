@@ -22,6 +22,11 @@ Core operating principle:
 - Each department is structured with clear ownership boundaries and expected responsibilities.
 - Security, testing, and operational reliability are built in from the beginning.
 
+Run locally / Packaging:
+- This repo can be run as a downloadable local application (backend + web/native UI). See PACKAGING.md for instructions to start the backend and optionally the Electron native UI.
+- Quick start (Windows PowerShell): `scripts\start_local.ps1 -StartElectron`.
+- Quick start (macOS/Linux): `./scripts/start_local.sh --electron`.
+
 Validation:
 1. Install Python 3.10+ and Go.
 2. From repo root, run `scripts\run_tests.ps1`.
