@@ -55,16 +55,18 @@ def enqueue_run(brief: Dict[str, Any], departments: Optional[list[str]] = None) 
         'logs': []
     }
 
-    # try Redis/RQ
+    # try Redis/RQ with a lock to avoid races between enqueue and metadata persistence
     redis_url = os.getenv('REDIS_URL')
     if redis_url and redis is not None and Queue is not None:
         try:
             r = redis.from_url(redis_url, decode_responses=True)
             q = Queue('orchestrator', connection=r)
-            # enqueue job: we use a minimal job that will run run_job
-            q.enqueue(run_job, run_id, run_meta)
-            # persist metadata in redis
-            r.set(f'run:{run_id}', json.dumps(run_meta))
+            lock_key = f"lock:run:{run_id}"
+            with r.lock(lock_key, timeout=10):
+                # persist metadata first, then enqueue the RQ job; using a lock to reduce race window
+                r.set(f'run:{run_id}', json.dumps(run_meta))
+                # enqueue job: we use a minimal job that will run run_job
+                q.enqueue(run_job, run_id, run_meta)
             return run_id
         except Exception:
             # fall back to local file
