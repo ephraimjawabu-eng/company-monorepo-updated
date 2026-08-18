@@ -27,6 +27,12 @@ class KMSClient:
       client = KMSClient()
       kek = client.get_kek()  # raw bytes
       dek = client.derive_dek(kek, context=b"service:storage")
+
+    Backends supported (demo):
+      - env: reads KEK_BASE64 from environment
+      - keyring: reads API key or KEK from OS keyring via python-keyring (user-level)
+
+    In production, replace with Vault/AWS KMS/HSM implementations.
     """
 
     def __init__(self) -> None:
@@ -35,7 +41,8 @@ class KMSClient:
     def get_kek(self) -> Optional[bytes]:
         """Retrieve the master KEK as raw bytes.
 
-        For demo: read KEK_BASE64 from environment. In production, replace this with Vault/KMS call.
+        For demo: read KEK_BASE64 from environment. If backend == 'keyring', attempt to read
+        a stored entry named 'company_engine_kek' from the OS keyring (python-keyring).
         """
         if self.backend == "env":
             b64 = os.environ.get("KEK_BASE64")
@@ -46,6 +53,18 @@ class KMSClient:
                 return base64.b64decode(b64)
             except Exception:
                 log.exception("Failed to decode KEK_BASE64")
+                return None
+        if self.backend == "keyring":
+            try:
+                import keyring
+                val = keyring.get_password('company_engine', 'master_kek')
+                if not val:
+                    log.warning('No master_kek found in keyring')
+                    return None
+                # expect base64-encoded stored value
+                return base64.b64decode(val)
+            except Exception:
+                log.exception('Failed to read KEK from keyring')
                 return None
         # TODO: add hooks for Vault, AWS KMS, GCP KMS, HSM, etc.
         log.error("Unsupported KMS_BACKEND: %s", self.backend)

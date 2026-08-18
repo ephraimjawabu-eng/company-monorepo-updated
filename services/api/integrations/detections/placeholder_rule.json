@@ -1,0 +1,8 @@
+{
+  "id": "det-001",
+  "title": "Example: Suspicious DB access from frontend",
+  "type": "topology",
+  "condition": "frontend->db",
+  "severity": "high",
+  "description": "Detect when frontend can reach DB directly (should be backend only)"
+}

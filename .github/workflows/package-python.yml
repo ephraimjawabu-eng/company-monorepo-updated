@@ -1,0 +1,23 @@
+name: Package Python bundle
+
+on:
+  workflow_dispatch:
+
+jobs:
+  package-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Create package bundle
+        run: |
+          chmod +x scripts/package_python.sh
+          ./scripts/package_python.sh
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: py-bundle
+          path: dist/*.zip
